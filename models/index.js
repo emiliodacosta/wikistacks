@@ -17,11 +17,22 @@ const Page = db.define('page', {
     allowNull: false
   },
   status: {
-    type: Sequelize.ENUM('open', 'closed')
-  },
-  date: {
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.NOW
+    type: Sequelize.ENUM('open', 'closed'),
+    defaultValue: 'open'
+  }
+}, {
+  hooks: {
+    beforeValidate: (page, title) => {
+      if (title) {
+        // Removes all non-alphanumeric characters from title
+        // And make whitespace underscore
+        console.log('called')
+        page.urlTitle = page.title.replace(/\s+/g, '_').replace(/\W/g, '');
+      } else {
+        // Generates random 5 letter string
+        page.urlTitle = Math.random().toString(36).substring(2, 7);
+      }
+    }
   }
 }, {
   getterMethods: {

@@ -5,31 +5,41 @@ const Page = models.Page;
 const User = models.User;
 
 app.get('/', function (req, res, next){
-  res.redirect('/');
+  Page.findAll()
+  .then(function (found){
+    res.render('index', {pages: found});
+  })
 });
 
 app.post('/', function(req, res, next) {
-  console.log(req.body);
   // STUDENT ASSIGNMENT:
   // add definitions for `title` and `content`
-
   let page = Page.build({
     title: req.body.title,
     content: req.body.page_content
   });
-
-  // STUDENT ASSIGNMENT:
-  // make sure we only redirect *after* our save is complete!
-  // note: `.save` returns a promise or it can take a callback.
   page.save()
-  .then(function(){
-    res.redirect('/');
+  .then(function(found){
+    res.redirect('/wiki/' + found.dataValues.urlTitle);
   });
   // -> after save -> res.redirect('/');
 });
 
 app.get('/add', function (req, res, next){
   res.render('addpage');
+});
+
+app.get('/:urlTitle', function (req, res, next){
+  Page.findOne({
+    where: {
+      urlTitle: req.params.urlTitle
+    }
+  })
+  .then(function(found){
+    console.log(found.dataValues);
+    res.render('wikipage', {title: found.dataValues.title, content: found.dataValues.content});
+  })
+  .catch(next);
 });
 
 module.exports = app;
